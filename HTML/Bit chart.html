@@ -4,12 +4,12 @@
   <title>3x3 Chart</title>
   <style>
     table {
-      width: 100%;
+      width: 90%;
       border-collapse: collapse;
     }
     th, td {
       padding: 8px;
-      text-align: left;
+      text-align: center;
       border-right: 1px solid #ddd;
       border-bottom: 1px solid #ddd;
     }
@@ -18,6 +18,17 @@
     }
     td:last-child, th:last-child {
       border-right: none;
+    }
+    .positive-percentage {
+      background-color: #d4edda;
+    }
+    .negative-percentage {
+      background-color: #f8d7da;
+    }
+    .time {
+      font-family: 'Calibri', sans-serif;
+      font-size: 14px;
+      color: #666;
     }
   </style>
 </head>
@@ -28,27 +39,47 @@
       <th>Price</th>
       <th>Percentage</th>
       <th>Quality</th>
+      <th>BUY.Point</th>
+      <th>SELL.Point</th>
+      <th>Profit%</th>
+      <th>Time</th>
     </tr>
     <tr>
       <td>BTCUSDT</td>
       <td id="bitcoin-percentage">-</td>
       <td id="bitcoin-price">-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td id="bitcoin-time" class="time">-</td>
     </tr>
     <tr>
       <td>NEARUSDT</td>
-      <td>Row 2, Col 2</td>
-      <td>Row 2, Col 3</td>
+      <td id="near-percentage">-</td>
+      <td id="near-price">-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td id="near-time" class="time">-</td>
     </tr>
     <tr>
       <td>SANDUSDT</td>
-      <td>Row 3, Col 2</td>
-      <td>Row 3, Col 3</td>
+      <td id="sand-percentage">-</td>
+      <td id="sand-price">-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td id="sand-time" class="time">-</td>
     </tr>
   </table>
 
   <script>
     let currentBitcoinPrice = 0;
     let previousBitcoinPrice = 0;
+    let currentNearPrice = 0;
+    let previousNearPrice = 0;
+    let currentSandPrice = 0;
+    let previousSandPrice = 0;
 
     function fetchBitcoinPrice() {
       fetch('https://api.coindesk.com/v1/bpi/currentprice.json')
@@ -61,19 +92,103 @@
           if (previousBitcoinPrice !== 0) {
             const percentageChange = ((currentBitcoinPrice - previousBitcoinPrice) / previousBitcoinPrice) * 100;
             const formattedPercentage = percentageChange.toFixed(2) + '%';
-            document.getElementById('bitcoin-percentage').textContent = formattedPercentage;
+            const percentageElement = document.getElementById('bitcoin-percentage');
+            percentageElement.textContent = formattedPercentage;
+
+            if (percentageChange >= 0) {
+              percentageElement.classList.add('positive-percentage');
+              percentageElement.classList.remove('negative-percentage');
+            } else {
+              percentageElement.classList.add('negative-percentage');
+              percentageElement.classList.remove('positive-percentage');
+            }
           }
+
+          const currentTime = new Date().toLocaleString();
+          const timeElement = document.getElementById('bitcoin-time');
+          timeElement.textContent = currentTime;
+          timeElement.classList.add('time');
 
           previousBitcoinPrice = currentBitcoinPrice;
         })
         .catch(error => console.error('Error fetching data:', error));
     }
 
-    // Fetch the initial Bitcoin price
-    fetchBitcoinPrice();
+    function fetchNearPrice() {
+      fetch('https://api.coingecko.com/api/v3/simple/price?ids=near-protocol&vs_currencies=usd')
+        .then(response => response.json())
+        .then(data => {
+          currentNearPrice = data['near-protocol'].usd;
+          const nearPrice = currentNearPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+          document.getElementById('near-price').textContent = nearPrice;
 
-    // Update the Bitcoin price every 60 seconds (1 minute)
-    setInterval(fetchBitcoinPrice, 60);
+          if (previousNearPrice !== 0) {
+            const percentageChange = ((currentNearPrice - previousNearPrice) / previousNearPrice) * 100;
+            const formattedPercentage = percentageChange.toFixed(2) + '%';
+            const percentageElement = document.getElementById('near-percentage');
+            percentageElement.textContent = formattedPercentage;
+
+            if (percentageChange >= 0) {
+              percentageElement.classList.add('positive-percentage');
+              percentageElement.classList.remove('negative-percentage');
+            } else {
+              percentageElement.classList.add('negative-percentage');
+              percentageElement.classList.remove('positive-percentage');
+            }
+          }
+
+          const currentTime = new Date().toLocaleString();
+          const timeElement = document.getElementById('near-time');
+          timeElement.textContent = currentTime;
+          timeElement.classList.add('time');
+
+          previousNearPrice = currentNearPrice;
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }
+
+    function fetchSandPrice() {
+      fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-sandbox&vs_currencies=usd')
+        .then(response => response.json())
+        .then(data => {
+          currentSandPrice = data['the-sandbox'].usd;
+          const sandPrice = currentSandPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+          document.getElementById('sand-price').textContent = sandPrice;
+
+          if (previousSandPrice !== 0) {
+            const percentageChange = ((currentSandPrice - previousSandPrice) / previousSandPrice) * 100;
+            const formattedPercentage = percentageChange.toFixed(2) + '%';
+            const percentageElement = document.getElementById('sand-percentage');
+            percentageElement.textContent = formattedPercentage;
+
+            if (percentageChange >= 0) {
+              percentageElement.classList.add('positive-percentage');
+              percentageElement.classList.remove('negative-percentage');
+            } else {
+              percentageElement.classList.add('negative-percentage');
+              percentageElement.classList.remove('positive-percentage');
+            }
+          }
+
+          const currentTime = new Date().toLocaleString();
+          const timeElement = document.getElementById('sand-time');
+          timeElement.textContent = currentTime;
+          timeElement.classList.add('time');
+
+          previousSandPrice = currentSandPrice;
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }
+
+    // Fetch the initial prices
+    fetchBitcoinPrice();
+    fetchNearPrice();
+    fetchSandPrice();
+
+    // Update the prices every 5 seconds (5000 milliseconds)
+    setInterval(fetchBitcoinPrice, 5000);
+    setInterval(fetchNearPrice, 5000);
+    setInterval(fetchSandPrice, 5000);
   </script>
 </body>
 </html>
